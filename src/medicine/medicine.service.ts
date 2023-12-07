@@ -120,4 +120,12 @@ export class MedicineService {
       .distinct(true)
       .getRawMany();
   }
+
+  distinctPharmaceuticalForm(): Promise<Medicine[]> {
+    return this.medicineRepository
+      .createQueryBuilder('medicines')
+      .select('medicines.pharmaceuticalForm', 'pharmaceuticalForm')
+      .distinct(true)
+      .getRawMany();
+  }
 }

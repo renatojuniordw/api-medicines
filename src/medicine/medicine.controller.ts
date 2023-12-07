@@ -49,4 +49,9 @@ export class MedicineController {
   getSimilarMedicine(): Promise<Medicine[]> {
     return this.medicineService.distinctSimilarMedicine();
   }
+
+  @Get('find/pharmaceutical-form')
+  getPharmaceuticalForm(): Promise<Medicine[]> {
+    return this.medicineService.distinctPharmaceuticalForm();
+  }
 }
