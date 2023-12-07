@@ -20,6 +20,7 @@ import 'dotenv/config';
       entities: [],
       synchronize: true,
       autoLoadEntities: true,
+      connectTimeout: 60000,
     }),
     ConfigModule.forRoot(),
 
