@@ -1,20 +1,17 @@
 import { Module } from '@nestjs/common';
+import { MedicineController } from './medicine.controller';
+import { MedicineService } from './medicine.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MulterModule } from '@nestjs/platform-express';
 
-import { AppService } from './app.service';
-import { AppController } from './app.controller';
-import { MedicineModule } from './medicine/medicine.module';
-
 @Module({
   imports: [
-    MedicineModule,
     TypeOrmModule.forFeature([]),
     MulterModule.register({
       dest: './files',
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [MedicineController],
+  providers: [MedicineService],
 })
-export class AppModule {}
+export class MedicineModule {}
