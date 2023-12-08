@@ -37,7 +37,7 @@ COPY --from=build /usr/src/app/dist ./dist
 
 COPY package*.json ./
 
-RUN npm install --only=production
+RUN npm install  --legacy-peer-deps --only=production
 
 RUN rm package*.json
 
