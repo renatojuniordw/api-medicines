@@ -10,9 +10,9 @@ services:
       - '3000:3000'
     environment:
       NODE_ENV: development
-      DATABASE_HOST: sql570.main-hosting.eu
-      DATABASE_DB: db
-      DATABASE_USER: user
-      DATABASE_PASSWORD: pass
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_DB: ${DATABASE_DB}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       DATABASE_PORT: 3306
-      SERVER_PORT: 3000
+      SERVER_PORT: ${SERVER_PORT}
