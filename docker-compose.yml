@@ -14,3 +14,4 @@ services:
       DATABASE_USER: u488253619_medicines
       DATABASE_PASSWORD: R3nat1nh0123@db
       DATABASE_PORT: 3306
+      PORT: 3000
