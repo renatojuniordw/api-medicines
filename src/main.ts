@@ -8,11 +8,9 @@ async function bootstrap() {
 
   app.enableCors();
   await app
-    .listen(process.env.SERVER_PORT, process.env.SERVER_HOST)
+    .listen(process.env.PORT || 3000)
     .then(() => {
-      console.log(
-        `Server running on http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}`,
-      );
+      console.log(`Server running`);
     })
     .catch((error) => {
       console.error(`Failed to start server: ${error}`);
