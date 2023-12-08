@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  nestjs-app:
+    container_name: api-medicine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: sql570.main-hosting.eu
+      DATABASE_DB: db
+      DATABASE_USER: user
+      DATABASE_PASSWORD: pass
+      DATABASE_PORT: 3306
+      SERVER_PORT: 3000
