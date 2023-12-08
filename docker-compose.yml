@@ -1,4 +1,4 @@
-version: '1.0'
+version: '3.8'
 
 services:
   nestjs-app:
@@ -14,4 +14,4 @@ services:
       DATABASE_USER: u488253619_medicines
       DATABASE_PASSWORD: R3nat1nh0123@db
       DATABASE_PORT: 3306
-      PORT: 3000
+      SERVER_PORT: 3000
