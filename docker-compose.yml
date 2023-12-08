@@ -16,6 +16,3 @@ services:
       DATABASE_PASSWORD: R3nat1nh0123@db
       DATABASE_PORT: 3306
       SERVER_PORT: 3000
-      JWT_SECRET: 123
-    networks:
-      - nestjs_network
