@@ -1,6 +1,7 @@
 import {
   Get,
   Post,
+  Query,
   Controller,
   UploadedFile,
   UseInterceptors,
@@ -11,6 +12,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 import { MedicineService } from './medicine.service';
 import { Medicine } from './schemas/medicine.schema';
+
+import { PaginationQuery } from './schemas/pagination.query';
 
 @Controller('medicine')
 export class MedicineController {
@@ -25,41 +28,42 @@ export class MedicineController {
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  getAll(): Promise<Medicine[]> {
-    return this.medicineService.findAll();
+  getAll(@Query() query: PaginationQuery): Promise<Medicine[]> {
+    const { page, limit } = query;
+    return this.medicineService.findAll(page, limit);
   }
 
-  @Get('find/abilify')
+  @Get('abilify')
   @UseGuards(AuthGuard('jwt'))
   getAllForAbilify(): Promise<Medicine[]> {
     return this.medicineService.findForAbilify();
   }
 
-  @Get('find/reference')
+  @Get('reference')
   @UseGuards(AuthGuard('jwt'))
   getReferences(): Promise<Medicine[]> {
     return this.medicineService.distinctReference();
   }
 
-  @Get('find/active-ingredient')
+  @Get('active-ingredient')
   @UseGuards(AuthGuard('jwt'))
   getActiveIngredient(): Promise<Medicine[]> {
     return this.medicineService.distinctActiveIngredient();
   }
 
-  @Get('find/trade-name')
+  @Get('trade-name')
   @UseGuards(AuthGuard('jwt'))
   getTradeName(): Promise<Medicine[]> {
     return this.medicineService.distinctTradeName();
   }
 
-  @Get('find/similar-medicine')
+  @Get('similar-medicine')
   @UseGuards(AuthGuard('jwt'))
   getSimilarMedicine(): Promise<Medicine[]> {
     return this.medicineService.distinctSimilarMedicine();
   }
 
-  @Get('find/pharmaceutical-form')
+  @Get('pharmaceutical-form')
   @UseGuards(AuthGuard('jwt'))
   getPharmaceuticalForm(): Promise<Medicine[]> {
     return this.medicineService.distinctPharmaceuticalForm();
