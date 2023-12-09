@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { AuthDto } from './dto/auth.dto';
+import { AuthDto, ResponseAuth } from './dto/auth.dto';
 import { Auth } from './schema/auth.schema';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(dto: AuthDto): Promise<string> {
+  async register(dto: AuthDto): Promise<ResponseAuth> {
     const existingUser = await this.authRepository.findOneBy({
       email: dto.email,
     });
@@ -34,17 +34,19 @@ export class AuthService {
       password: hashedPass,
     });
 
-    return this.createToken(newUser.id, newUser.email);
+    const token = this.createToken(newUser.id, newUser.email);
+    return { name: newUser.name, email: newUser.email, token };
   }
 
-  async login(dto: AuthDto): Promise<string> {
+  async login(dto: AuthDto): Promise<ResponseAuth> {
     const user = await this.authRepository.findOneBy({
       email: dto.email,
     });
     if (!user) throw new UnauthorizedException('Wrong email');
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Wrong password');
-    return this.createToken(user.id, user.email);
+    const token = this.createToken(user.id, user.email);
+    return { name: user.name, email: user.email, token };
   }
 
   createToken(id, email) {
