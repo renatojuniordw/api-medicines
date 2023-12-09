@@ -4,7 +4,7 @@ import { MulterModule } from '@nestjs/platform-express';
 
 import { MedicineController } from './medicine.controller';
 import { MedicineService } from './medicine.service';
-import { Medicine } from './medicine.entity';
+import { Medicine } from './schemas/medicine.schema';
 
 @Module({
   imports: [

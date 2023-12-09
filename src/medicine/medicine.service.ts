@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import * as moment from 'moment';
 import * as XLSX from 'xlsx';
 
-import { Medicine } from './medicine.entity';
+import { Medicine } from './schemas/medicine.schema';
 
 @Injectable()
 export class MedicineService {

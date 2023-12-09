@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppService } from './app.service';
+import { congif } from './config/env.config';
+import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { MedicineModule } from './medicine/medicine.module';
 
@@ -22,9 +24,14 @@ import 'dotenv/config';
       autoLoadEntities: true,
       connectTimeout: 60000,
     }),
+    ConfigModule.forRoot({
+      load: [congif],
+      isGlobal: true,
+    }),
     ConfigModule.forRoot(),
 
     MedicineModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
