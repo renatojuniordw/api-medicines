@@ -9,4 +9,5 @@ export class MedicineDto {
   inclusionDate: string;
   createdAt?: Date;
   updatedAt?: Date;
+  key: number;
 }
