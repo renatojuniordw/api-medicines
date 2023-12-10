@@ -75,4 +75,10 @@ export class MedicineController {
   getPharmaceuticalForm(): Promise<Medicine[]> {
     return this.medicineService.distinctPharmaceuticalForm();
   }
+
+  @Get('reference-counts')
+  @UseGuards(AuthGuard('jwt'))
+  getReferenceCounts(): Promise<{ reference: string; count: number }[]> {
+    return this.medicineService.getUniqueReferenceCounts();
+  }
 }

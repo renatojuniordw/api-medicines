@@ -133,4 +133,20 @@ export class MedicineService {
       .distinct(true)
       .getRawMany();
   }
+
+  async getUniqueReferenceCounts(): Promise<
+    { reference: string; count: number }[]
+  > {
+    const result = await this.medicineRepository
+      .createQueryBuilder('medicines')
+      .select('medicines.reference', 'reference')
+      .addSelect('COUNT(medicines.reference)', 'count')
+      .groupBy('medicines.reference')
+      .getRawMany();
+
+    return result.map(({ reference, count }) => ({
+      reference,
+      count: parseInt(count),
+    }));
+  }
 }
