@@ -72,7 +72,12 @@ export class MedicineService {
       skip: (page - 1) * pageSize,
     });
 
-    return { data, total };
+    const objectsWithKey = data.map((obj) => ({
+      ...obj,
+      key: obj.id,
+    }));
+
+    return { data: objectsWithKey, total };
   }
 
   findOne(id: number): Promise<Medicine | null> {
