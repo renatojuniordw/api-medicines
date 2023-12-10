@@ -66,13 +66,13 @@ export class MedicineService {
     return await this.create(data);
   }
 
-  async findAll(page: number, limit: number): Promise<Medicine[]> {
-    const offset = (page - 1) * limit;
-    const entities = await this.medicineRepository.find({
-      skip: offset,
-      take: limit,
+  async findAll(page: number, pageSize: number): Promise<any> {
+    const [data, total] = await this.medicineRepository.findAndCount({
+      take: pageSize,
+      skip: (page - 1) * pageSize,
     });
-    return entities;
+
+    return { data, total };
   }
 
   findOne(id: number): Promise<Medicine | null> {

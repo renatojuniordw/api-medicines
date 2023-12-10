@@ -2,10 +2,11 @@ import {
   Get,
   Post,
   Query,
+  UseGuards,
   Controller,
   UploadedFile,
+  ValidationPipe,
   UseInterceptors,
-  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -13,7 +14,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MedicineService } from './medicine.service';
 import { Medicine } from './schemas/medicine.schema';
 
-import { PaginationQuery } from './schemas/pagination.query';
+import { PaginationDto } from './dto/pagination.dto';
+import { ResultMedicine } from './dto/resultMedicine.dto';
 
 @Controller('medicine')
 export class MedicineController {
@@ -28,9 +30,14 @@ export class MedicineController {
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  getAll(@Query() query: PaginationQuery): Promise<Medicine[]> {
-    const { page, limit } = query;
-    return this.medicineService.findAll(page, limit);
+  async getAll(
+    @Query(new ValidationPipe({ transform: true }))
+    paginationDto: PaginationDto,
+  ): Promise<ResultMedicine> {
+    const { page, pageSize } = paginationDto;
+    const { data, total } = await this.medicineService.findAll(page, pageSize);
+
+    return { data, total, pagination: { current: page, pageSize, total } };
   }
 
   @Get('abilify')
