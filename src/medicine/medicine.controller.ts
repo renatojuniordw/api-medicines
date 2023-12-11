@@ -1,5 +1,6 @@
 import {
   Get,
+  Body,
   Post,
   Query,
   UseGuards,
@@ -7,31 +8,31 @@ import {
   UploadedFile,
   ValidationPipe,
   UseInterceptors,
-  Body,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { MedicineService } from './medicine.service';
 import { Medicine } from './schemas/medicine.schema';
 
+import { FilterDto } from './dto/filter.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ResultPagedMedicines } from './dto/resultMedicine.dto';
-import { FilterDto } from './dto/filter.dto';
+
+import { JwtAudienceGuard } from 'src/config/jwt-audience-guard';
 
 @Controller('medicine')
 export class MedicineController {
   constructor(private readonly medicineService: MedicineService) {}
 
   @Post('import')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.medicineService.importMedicines(file.path);
   }
 
   @Get('all')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   async getAll(
     @Query(new ValidationPipe({ transform: true }))
     paginationDto: PaginationDto,
@@ -43,7 +44,7 @@ export class MedicineController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   async getMedicine(
     @Body() filter: FilterDto,
     @Query(new ValidationPipe({ transform: true }))
@@ -60,43 +61,43 @@ export class MedicineController {
   }
 
   @Get('abilify')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getAllForAbilify(): Promise<Medicine[]> {
     return this.medicineService.findForAbilify();
   }
 
   @Get('reference')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getReferences(): Promise<Medicine[]> {
     return this.medicineService.distinctReference();
   }
 
   @Get('active-ingredient')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getActiveIngredient(): Promise<Medicine[]> {
     return this.medicineService.distinctActiveIngredient();
   }
 
   @Get('trade-name')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getTradeName(): Promise<Medicine[]> {
     return this.medicineService.distinctTradeName();
   }
 
   @Get('similar-medicine')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getSimilarMedicine(): Promise<Medicine[]> {
     return this.medicineService.distinctSimilarMedicine();
   }
 
   @Get('pharmaceutical-form')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getPharmaceuticalForm(): Promise<Medicine[]> {
     return this.medicineService.distinctPharmaceuticalForm();
   }
 
   @Get('reference-counts')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAudienceGuard)
   getReferenceCounts(): Promise<{ reference: string; count: number }[]> {
     return this.medicineService.getUniqueReferenceCounts();
   }

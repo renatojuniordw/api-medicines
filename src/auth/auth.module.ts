@@ -17,6 +17,10 @@ import { JwtStrategy } from './stratgey/jwt.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('jwtSecret'),
+        signOptions: {
+          expiresIn: '12h',
+          audience: 'api_interchangeable_medicines',
+        },
       }),
     }),
   ],
