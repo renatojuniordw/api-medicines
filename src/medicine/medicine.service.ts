@@ -7,6 +7,9 @@ import * as XLSX from 'xlsx';
 
 import { Medicine } from './schemas/medicine.schema';
 
+import { FilterDto } from './dto/filter.dto';
+import { ResultMedicine } from './dto/resultMedicine.dto';
+
 @Injectable()
 export class MedicineService {
   constructor(
@@ -66,10 +69,31 @@ export class MedicineService {
     return await this.create(data);
   }
 
-  async findAll(page: number, pageSize: number): Promise<any> {
+  async findAll(page: number, pageSize: number): Promise<ResultMedicine> {
     const [data, total] = await this.medicineRepository.findAndCount({
       take: pageSize,
       skip: (page - 1) * pageSize,
+    });
+
+    const objectsWithKey = data.map((obj) => ({
+      ...obj,
+      key: obj.id,
+    }));
+
+    return { data: objectsWithKey, total };
+  }
+
+  async filterMedicine(
+    page: number,
+    pageSize: number,
+    valueFilter: FilterDto,
+  ): Promise<ResultMedicine> {
+    const [data, total] = await this.medicineRepository.findAndCount({
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+      where: {
+        ...valueFilter,
+      },
     });
 
     const objectsWithKey = data.map((obj) => ({
