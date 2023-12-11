@@ -30,7 +30,7 @@ export class MedicineController {
     return this.medicineService.importMedicines(file.path);
   }
 
-  @Get()
+  @Get('all')
   @UseGuards(AuthGuard('jwt'))
   async getAll(
     @Query(new ValidationPipe({ transform: true }))
@@ -42,15 +42,15 @@ export class MedicineController {
     return { data, total, pagination: { current: page, pageSize, total } };
   }
 
-  @Post('filter')
+  @Post()
   @UseGuards(AuthGuard('jwt'))
-  async getFilterMedicine(
+  async getMedicine(
     @Body() filter: FilterDto,
     @Query(new ValidationPipe({ transform: true }))
     paginationDto: PaginationDto,
   ): Promise<ResultPagedMedicines> {
     const { page, pageSize } = paginationDto;
-    const { data, total } = await this.medicineService.filterMedicine(
+    const { data, total } = await this.medicineService.findMedicine(
       page,
       pageSize,
       filter,

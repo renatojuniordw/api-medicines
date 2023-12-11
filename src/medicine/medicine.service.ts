@@ -83,7 +83,7 @@ export class MedicineService {
     return { data: objectsWithKey, total };
   }
 
-  async filterMedicine(
+  async findMedicine(
     page: number,
     pageSize: number,
     valueFilter: FilterDto,
