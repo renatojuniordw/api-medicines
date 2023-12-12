@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 
 import { Auth } from './schema/auth.schema';
 import { JwtStrategy } from './stratgey/jwt.strategy';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { JwtStrategy } from './stratgey/jwt.strategy';
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, EmailService],
   controllers: [AuthController],
 })
 export class AuthModule {}

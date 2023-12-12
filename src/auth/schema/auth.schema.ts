@@ -1,12 +1,12 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity({ name: 'auth' })
+@Entity({ name: 'user' })
 export class Auth {
   @PrimaryGeneratedColumn()
   id?: number;
@@ -19,6 +19,9 @@ export class Auth {
 
   @Column()
   password: string;
+
+  @Column({ default: false })
+  emailVerified: boolean;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt?: Date;

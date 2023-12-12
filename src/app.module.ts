@@ -2,11 +2,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppService } from './app.service';
 import { congif } from './config/env.config';
-import { AuthModule } from './auth/auth.module';
+
+import { AppService } from './app.service';
 import { AppController } from './app.controller';
+
 import { MedicineModule } from './medicine/medicine.module';
+import { EmailModule } from './email/email.module';
+import { AuthModule } from './auth/auth.module';
 
 import 'dotenv/config';
 
@@ -32,6 +35,7 @@ import 'dotenv/config';
 
     MedicineModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
