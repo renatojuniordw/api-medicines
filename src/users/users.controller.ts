@@ -11,18 +11,20 @@ import {
   ValidationPipe,
   ForbiddenException,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+
+import { User } from './entity/user.entity';
+import { UserRole } from './dto/user-role.enum';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
 
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ReturnUserDto } from './dto/return-user.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Role } from 'src/auth/role.decorator';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { UserRole } from './dto/user-role.enum';
 import { UpdateUserDto } from './dto/update-users.dto';
-import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from './entity/user.entity';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
+
+import { Role } from 'src/auth/decorator/role.decorator';
+import { GetUser } from 'src/auth/decorator/get-user.decorator';
 
 @Controller('users')
 @UseGuards(AuthGuard(), RolesGuard)

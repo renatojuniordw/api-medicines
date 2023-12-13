@@ -12,7 +12,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { CredentialsDto } from './dto/credentials.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entity/user.entity';
-import { GetUser } from './get-user.decorator';
+import { GetUser } from './decorator/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {

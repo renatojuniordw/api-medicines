@@ -14,7 +14,6 @@ export class JwtAudienceGuard extends AuthGuard('jwt') {
     const token = request.headers.authorization.split(' ')[1];
 
     const decodedToken = this.validateToken(token);
-    console.log(decodedToken);
     if (
       !decodedToken ||
       !decodedToken.aud ||

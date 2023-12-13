@@ -18,7 +18,7 @@ import { FilterDto } from './dto/filter.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ResultPagedMedicines } from './dto/resultMedicine.dto';
 
-import { JwtAudienceGuard } from 'src/config/jwt-audience-guard';
+import { JwtAudienceGuard } from 'src/shared/guard/jwt-audience-guard';
 
 @Controller('medicine')
 export class MedicineController {
