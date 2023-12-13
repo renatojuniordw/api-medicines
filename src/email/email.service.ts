@@ -1,28 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
 
-import * as nodemailer from 'nodemailer';
-
-import { BodyEmail } from './dto/body-email.dto';
+import { User } from 'src/users/entity/user.entity';
 
 @Injectable()
 export class EmailService {
-  private transporter;
+  constructor(private mailerService: MailerService) {}
 
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.hostinger.com',
-      port: 587,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+  async sendUserConfirmation(user: User, token: string) {
+    const url = `example.com/auth/confirm?token=${token}`;
+
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Bem-vindo ao MedInter Web! Confirme seu email',
+      template: './confirmation',
+      context: {
+        name: user.name,
+        token: user.confirmationToken,
+        url,
       },
-    });
-  }
-
-  async sendMail(body: BodyEmail): Promise<void> {
-    await this.transporter.sendMail({
-      from: process.env.EMAIL_USER_ALIAS,
-      ...body,
     });
   }
 }

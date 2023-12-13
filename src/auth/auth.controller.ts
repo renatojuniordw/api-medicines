@@ -2,16 +2,20 @@ import {
   Get,
   Post,
   Body,
+  Patch,
+  Param,
   UseGuards,
   Controller,
   ValidationPipe,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
+
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { CredentialsDto } from './dto/credentials.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entity/user.entity';
+
 import { GetUser } from './decorator/get-user.decorator';
 
 @Controller('auth')
@@ -39,5 +43,14 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   getMe(@GetUser() user: User): User {
     return user;
+  }
+
+  @Patch(':token')
+  async confirmEmail(@Param('token') token: string) {
+    console.log(token);
+    const user = await this.authService.confirmEmail(token);
+    return {
+      message: 'Email confirmado',
+    };
   }
 }

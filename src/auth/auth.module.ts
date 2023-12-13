@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
 import { EmailService } from 'src/email/email.service';
@@ -12,7 +13,8 @@ import { UserRepository } from 'src/users/repository/users.repository';
 
 import 'dotenv/config';
 import { User } from 'src/users/entity/user.entity';
-import { PassportModule } from '@nestjs/passport';
+
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { PassportModule } from '@nestjs/passport';
         audience: process.env.JWT_AUDIENCE,
       },
     }),
+
+    EmailModule,
   ],
   providers: [AuthService, JwtStrategy, EmailService, UserRepository],
   controllers: [AuthController],

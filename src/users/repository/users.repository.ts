@@ -35,15 +35,20 @@ export class UserRepository extends Repository<User> {
     user.confirmationToken = crypto.randomBytes(32).toString('hex');
     user.salt = await bcrypt.genSalt();
     user.password = await this.hashPassword(password, user.salt);
+
     try {
       await user.save();
       delete user.password;
       delete user.salt;
       return user;
     } catch (error) {
-      if (error.code.toString() === '23505') {
+      if (
+        error.code.toString() === '23505' ||
+        (error.code.toString() === 'ER_DUP_ENTRY' && error.errno === 1062)
+      ) {
         throw new ConflictException('Endereço de email já está em uso');
       } else {
+        console.log(error);
         throw new InternalServerErrorException(
           'Erro ao salvar o usuário no banco de dados',
         );
