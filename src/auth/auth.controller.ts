@@ -1,19 +1,43 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Controller,
+  ValidationPipe,
+} from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { AuthDto, ResponseAuth } from './dto/auth.dto';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { CredentialsDto } from './dto/credentials.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/users/entity/user.entity';
+import { GetUser } from './get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('register')
-  register(@Body() dto: AuthDto): Promise<ResponseAuth> {
-    return this.authService.register(dto);
+  @Post('/signup')
+  async signUp(
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
+  ): Promise<{ message: string }> {
+    await this.authService.signUp(createUserDto);
+    return {
+      message: 'Cadastro realizado com sucesso',
+    };
   }
 
-  @Post('login')
-  login(@Body() dto: AuthDto): Promise<ResponseAuth> {
-    return this.authService.login(dto);
+  @Post('/signin')
+  async signIn(
+    @Body() credentiaslsDto: CredentialsDto,
+  ): Promise<{ name: string; email: string; token: string }> {
+    return await this.authService.signIn(credentiaslsDto);
+  }
+
+  @Get('/me')
+  @UseGuards(AuthGuard('jwt'))
+  getMe(@GetUser() user: User): User {
+    return user;
   }
 }

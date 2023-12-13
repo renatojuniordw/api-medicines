@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailerModule } from '@nestjs-modules/mailer';
 
-import { congif } from './config/env.config';
+import { config } from './config/env.config';
+import { mailerConfig } from './config/mailer.config';
 
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 
 import { MedicineModule } from './medicine/medicine.module';
 import { EmailModule } from './email/email.module';
+import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 
 import 'dotenv/config';
@@ -27,15 +30,18 @@ import 'dotenv/config';
       autoLoadEntities: true,
       connectTimeout: 60000,
     }),
+
+    MailerModule.forRoot(mailerConfig),
     ConfigModule.forRoot({
-      load: [congif],
+      load: [config],
       isGlobal: true,
     }),
     ConfigModule.forRoot(),
 
-    MedicineModule,
     AuthModule,
     EmailModule,
+    UsersModule,
+    MedicineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

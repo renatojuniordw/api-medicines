@@ -1,69 +1,46 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-
-import { AuthDto, ResponseAuth } from './dto/auth.dto';
-import { Auth } from './schema/auth.schema';
-
-import { EmailService } from 'src/email/email.service';
-
-import { BodyEmail } from 'src/email/dto/body-email.dto';
+import { UserRepository } from 'src/users/repository/users.repository';
+import { CredentialsDto } from './dto/credentials.dto';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { User } from 'src/users/entity/user.entity';
+import { UserRole } from 'src/users/dto/user-role.enum';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(Auth) private authRepository: Repository<Auth>,
+    @InjectRepository(UserRepository)
+    private userRepository: UserRepository,
     private jwtService: JwtService,
-    private readonly emailService: EmailService,
   ) {}
 
-  async register(dto: AuthDto): Promise<ResponseAuth> {
-    const existingUser = await this.authRepository.findOneBy({
-      email: dto.email,
-    });
+  async signIn(credentialsDto: CredentialsDto) {
+    const user = await this.userRepository.checkCredentials(credentialsDto);
 
-    if (existingUser) {
-      throw new ConflictException('Email already exists');
+    if (user === null) {
+      throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const hashedPass = await bcrypt.hash(dto.password, 10);
-    const newUser = await this.authRepository.save({
-      email: dto.email,
-      password: hashedPass,
+    const { name, email, id } = user;
+
+    const token = await this.jwtService.sign({
+      id,
     });
 
-    const token = this.createToken(newUser.id, newUser.email);
-
-    await this.emailService.sendMail({
-      to: newUser.email,
-      subject: '[MedInter] Usuário registado com sucesso! ',
-      text: `Olá ${newUser.name}, seja bem-vindo ao MedInter! \n Aqui, você terá na palma da sua mão informações sobre todos os medicamentos intercambiáveis e muito mais.`,
-    });
-
-    return { name: newUser.name, email: newUser.email, token };
+    return { name, email, token };
   }
 
-  async login(dto: AuthDto): Promise<ResponseAuth> {
-    const user = await this.authRepository.findOneBy({
-      email: dto.email,
-    });
-
-    if (!user) throw new UnauthorizedException('Wrong email');
-    const isMatch = await bcrypt.compare(dto.password, user.password);
-    if (!isMatch) throw new UnauthorizedException('Wrong password');
-    const token = this.createToken(user.id, user.email);
-
-    return { name: user.name, email: user.email, token };
-  }
-
-  createToken(id, email) {
-    return this.jwtService.sign({ id, email });
+  async signUp(createUserDto: CreateUserDto): Promise<User> {
+    if (createUserDto.password != createUserDto.passwordConfirmation) {
+      throw new UnprocessableEntityException('As senhas não conferem');
+    } else {
+      return await this.userRepository.createUser(createUserDto, UserRole.USER);
+    }
   }
 }

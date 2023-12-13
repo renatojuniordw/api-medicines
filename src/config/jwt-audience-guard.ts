@@ -14,13 +14,13 @@ export class JwtAudienceGuard extends AuthGuard('jwt') {
     const token = request.headers.authorization.split(' ')[1];
 
     const decodedToken = this.validateToken(token);
-
+    console.log(decodedToken);
     if (
       !decodedToken ||
       !decodedToken.aud ||
-      decodedToken.aud !== 'api_interchangeable_medicines'
+      decodedToken.aud !== process.env.JWT_AUDIENCE
     ) {
-      throw new UnauthorizedException('Token com audiência inválida');
+      throw new UnauthorizedException('Token inválido.');
     }
 
     return super.canActivate(context);

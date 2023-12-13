@@ -1,18 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { InjectRepository } from '@nestjs/typeorm';
+
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+import { UserRepository } from 'src/users/repository/users.repository';
+
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private configService: ConfigService) {
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(
+    @InjectRepository(UserRepository)
+    private userRepository: UserRepository,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('jwtSecret'),
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 
-  async validate(payload: any) {
-    return payload;
+  async validate(payload: { id: number }) {
+    const { id } = payload;
+    const user = await this.userRepository.findOne({
+      where: { id: String(id) },
+      select: ['name', 'email', 'status', 'role'],
+    });
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado');
+    }
+
+    return user;
   }
 }
