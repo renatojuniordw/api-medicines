@@ -21,4 +21,15 @@ export class EmailService {
       },
     });
   }
+
+  async sendRecoverPassword(user: User, token: string) {
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Recuperação de senha',
+      template: './recover-password',
+      context: {
+        token,
+      },
+    });
+  }
 }

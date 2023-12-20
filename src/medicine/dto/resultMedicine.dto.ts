@@ -11,6 +11,15 @@ export class Pagination {
   total: number;
 }
 
-export class ResultPagedMedicines extends ResultMedicine {
+export class ResultPagedMedicine extends ResultMedicine {
   pagination: Pagination;
+}
+
+export class ResultNameMedicine {
+  nameMedicine: string;
+  amount: string;
+}
+
+export class ResultItemFilter {
+  value: string;
 }

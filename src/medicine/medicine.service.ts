@@ -1,21 +1,22 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Repository } from 'typeorm';
 import * as moment from 'moment';
 import * as XLSX from 'xlsx';
 
 import { Medicine } from './schemas/medicine.schema';
 
 import { FilterDto } from './dto/filter.dto';
-import { ResultMedicine } from './dto/resultMedicine.dto';
+import {
+  ResultItemFilter,
+  ResultMedicine,
+  ResultNameMedicine,
+} from './dto/resultMedicine.dto';
+import { MedicineRepository } from './repository/medicines.repository';
 
 @Injectable()
 export class MedicineService {
-  constructor(
-    @InjectRepository(Medicine)
-    private medicineRepository: Repository<Medicine>,
-  ) {}
+  constructor(private medicineRepository: MedicineRepository) {}
 
   private capitalizeFirstWord(text: string): string {
     if (!text) {
@@ -69,113 +70,62 @@ export class MedicineService {
     return await this.create(data);
   }
 
-  async findAll(page: number, pageSize: number): Promise<ResultMedicine> {
-    const [data, total] = await this.medicineRepository.findAndCount({
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-    });
-
-    const objectsWithKey = data.map((obj) => ({
-      ...obj,
-      key: obj.id,
-    }));
-
-    return { data: objectsWithKey, total };
-  }
-
   async findMedicine(
     page: number,
     pageSize: number,
     valueFilter: FilterDto,
   ): Promise<ResultMedicine> {
-    const [data, total] = await this.medicineRepository.findAndCount({
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-      where: {
-        ...valueFilter,
-      },
-    });
+    const medicine =
+      await this.medicineRepository.filterMedicinesWithPagination(
+        page,
+        pageSize,
+        valueFilter,
+      );
 
-    const objectsWithKey = data.map((obj) => ({
-      ...obj,
-      key: obj.id,
-    }));
+    if (!medicine.data) {
+      throw new NotFoundException('Medicamentos não encontrado');
+    }
 
-    return { data: objectsWithKey, total };
+    return medicine;
   }
 
   findOne(id: number): Promise<Medicine | null> {
-    return this.medicineRepository.findOneBy({ id });
+    const medicine = this.medicineRepository.findOneBy({ id });
+
+    if (!medicine) {
+      throw new NotFoundException(`Medicamento de ID ${id}  não encontrado`);
+    }
+
+    return medicine;
   }
 
   async remove(id: number): Promise<void> {
     await this.medicineRepository.delete(id);
   }
 
-  findForAbilify(): Promise<Medicine[]> {
-    return this.medicineRepository.find({
-      where: {
-        reference: 'Abilify',
-      },
-    });
+  distinctReference(): Promise<ResultItemFilter[]> {
+    return this.medicineRepository.getDistinct('reference');
   }
 
-  distinctReference(): Promise<Medicine[]> {
-    return this.medicineRepository
-      .createQueryBuilder('medicines')
-      .select('medicines.reference', 'reference')
-      .distinct(true)
-      .getRawMany();
+  distinctActiveIngredient(): Promise<ResultItemFilter[]> {
+    return this.medicineRepository.getDistinct('activeIngredient');
   }
 
-  distinctActiveIngredient(): Promise<Medicine[]> {
-    return this.medicineRepository
-      .createQueryBuilder('medicines')
-      .select('medicines.activeIngredient', 'activeIngredient')
-      .distinct(true)
-      .getRawMany();
+  distinctTradeName(): Promise<ResultItemFilter[]> {
+    return this.medicineRepository.getDistinct('tradeName');
   }
 
-  distinctTradeName(): Promise<Medicine[]> {
-    return this.medicineRepository
-      .createQueryBuilder('medicines')
-      .select('medicines.tradeName', 'tradeName')
-      .distinct(true)
-      .getRawMany();
+  distinctSimilarMedicine(): Promise<ResultItemFilter[]> {
+    return this.medicineRepository.getDistinct(
+      'holderOfSimilarMedicineRegistration',
+    );
   }
 
-  distinctSimilarMedicine(): Promise<Medicine[]> {
-    return this.medicineRepository
-      .createQueryBuilder('medicines')
-      .select(
-        'medicines.holderOfSimilarMedicineRegistration',
-        'holderOfSimilarMedicineRegistration',
-      )
-      .distinct(true)
-      .getRawMany();
+  distinctPharmaceuticalForm(): Promise<ResultItemFilter[]> {
+    return this.medicineRepository.getDistinct('pharmaceuticalForm');
   }
 
-  distinctPharmaceuticalForm(): Promise<Medicine[]> {
-    return this.medicineRepository
-      .createQueryBuilder('medicines')
-      .select('medicines.pharmaceuticalForm', 'pharmaceuticalForm')
-      .distinct(true)
-      .getRawMany();
-  }
-
-  async getUniqueReferenceCounts(): Promise<
-    { reference: string; count: number }[]
-  > {
-    const result = await this.medicineRepository
-      .createQueryBuilder('medicines')
-      .select('medicines.reference', 'reference')
-      .addSelect('COUNT(medicines.reference)', 'count')
-      .groupBy('medicines.reference')
-      .getRawMany();
-
-    return result.map(({ reference, count }) => ({
-      reference,
-      count: parseInt(count),
-    }));
+  async getUniqueReferenceCounts(): Promise<ResultNameMedicine[]> {
+    return this.medicineRepository.getAllDistinctAndCount('reference');
   }
 }

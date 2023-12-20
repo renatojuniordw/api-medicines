@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MailerService } from '@nestjs-modules/mailer';
 
 import { UserRepository } from 'src/users/repository/users.repository';
 
@@ -16,8 +15,9 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { User } from 'src/users/entity/user.entity';
 import { UserRole } from 'src/users/dto/user-role.enum';
 
-import * as path from 'path';
 import { EmailService } from 'src/email/email.service';
+import { randomBytes } from 'crypto';
+import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -72,5 +72,46 @@ export class AuthService {
       { confirmationToken: null },
     );
     if (result.affected === 0) throw new NotFoundException('Token inválido');
+  }
+
+  async sendRecoverPasswordEmail(email: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user)
+      throw new NotFoundException('Não há usuário cadastrado com esse email.');
+
+    user.recoverToken = randomBytes(32).toString('hex');
+    await user.save();
+
+    await this.mailerService.sendRecoverPassword(user, user.recoverToken);
+  }
+
+  async changePassword(
+    id: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    const { password, passwordConfirmation } = changePasswordDto;
+
+    if (password != passwordConfirmation)
+      throw new UnprocessableEntityException('As senhas não conferem');
+
+    await this.userRepository.changePassword(id, password);
+  }
+
+  async resetPassword(
+    recoverToken: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { recoverToken },
+      select: ['id'],
+    });
+    if (!user) throw new NotFoundException('Token inválido.');
+
+    try {
+      await this.changePassword(user.id.toString(), changePasswordDto);
+    } catch (error) {
+      throw error;
+    }
   }
 }

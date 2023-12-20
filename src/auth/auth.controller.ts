@@ -7,6 +7,7 @@ import {
   UseGuards,
   Controller,
   ValidationPipe,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -17,6 +18,8 @@ import { CredentialsDto } from './dto/credentials.dto';
 import { User } from 'src/users/entity/user.entity';
 
 import { GetUser } from './decorator/get-user.decorator';
+import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
+import { UserRole } from 'src/users/dto/user-role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -47,10 +50,49 @@ export class AuthController {
 
   @Patch(':token')
   async confirmEmail(@Param('token') token: string) {
-    console.log(token);
-    const user = await this.authService.confirmEmail(token);
+    await this.authService.confirmEmail(token);
     return {
       message: 'Email confirmado',
+    };
+  }
+
+  @Post('/send-recover-email')
+  async sendRecoverPasswordEmail(
+    @Body('email') email: string,
+  ): Promise<{ message: string }> {
+    await this.authService.sendRecoverPasswordEmail(email);
+    return {
+      message: 'Foi enviado um email com instruções para resetar sua senha',
+    };
+  }
+
+  @Patch('/reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetPassword(token, changePasswordDto);
+
+    return {
+      message: 'Senha alterada com sucesso',
+    };
+  }
+
+  @Patch(':id/change-password')
+  @UseGuards(AuthGuard())
+  async changePassword(
+    @Param('id') id: string,
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
+    @GetUser() user: User,
+  ) {
+    if (user.role !== UserRole.ADMIN && user.id.toString() !== id)
+      throw new UnauthorizedException(
+        'Você não tem permissão para realizar esta operação',
+      );
+
+    await this.authService.changePassword(id, changePasswordDto);
+    return {
+      message: 'Senha alterada',
     };
   }
 }

@@ -5,15 +5,16 @@ import { MulterModule } from '@nestjs/platform-express';
 import { MedicineController } from './medicine.controller';
 import { MedicineService } from './medicine.service';
 import { Medicine } from './schemas/medicine.schema';
+import { MedicineRepository } from './repository/medicines.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Medicine]),
+    TypeOrmModule.forFeature([Medicine, MedicineRepository]),
     MulterModule.register({
       dest: './files',
     }),
   ],
+  providers: [MedicineService, MedicineRepository],
   controllers: [MedicineController],
-  providers: [MedicineService],
 })
 export class MedicineModule {}
