@@ -1,32 +1,23 @@
-FROM  --platform=linux/amd64 node:18-alpine AS build
+FROM node:alpine
 
-WORKDIR /usr/src/app
+# diretório alvo
+RUN mkdir -p /usr/src/node-api
+WORKDIR /usr/src/node-api
 
-COPY package*.json ./
+# instalação de dependências
+RUN apk update && apk upgrade
+RUN apk add python3 g++ make
 
+# copiar o projeto e instalar os pacotes com o npm
+COPY . /usr/src/node-api/
 RUN npm install --legacy-peer-deps
 
-COPY . .
+# instalação dos pacotes para envio de email
+RUN apk add msmtp
+RUN ln -sf /usr/bin/msmtp /usr/sbin/sendmail
 
-RUN npm run build
-
-
-#prod stage
-FROM  --platform=linux/amd64 node:18-alpine
-
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /usr/src/app
-
-COPY --from=build /usr/src/app/dist ./dist
-
-COPY package*.json ./
-
-RUN npm install  --legacy-peer-deps --only=production
-
-RUN rm package*.json
-
+# abrindo a porta 3000
 EXPOSE 3000
 
-CMD [ "node", "dist/main.js" ]
+# inicializando a API
+CMD [ "npm","run", "start" ]
