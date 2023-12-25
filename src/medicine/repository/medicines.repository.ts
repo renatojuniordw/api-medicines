@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 
 import { FilterDto } from '../dto/filter.dto';
-import { Medicine } from '../schemas/medicine.schema';
+import { Medicine } from '../entity/medicine.entity';
 import {
   ResultItemFilter,
   ResultMedicine,

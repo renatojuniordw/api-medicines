@@ -6,12 +6,17 @@ import {
   Query,
   Patch,
   Delete,
-  Controller,
   UseGuards,
+  Controller,
   ValidationPipe,
   ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { User } from './entity/user.entity';
 import { UserRole } from './dto/user-role.enum';
@@ -27,12 +32,17 @@ import { Role } from 'src/auth/decorator/role.decorator';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 
 @Controller('users')
+@ApiTags('users')
 @UseGuards(AuthGuard(), RolesGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post()
   @Role(UserRole.ADMIN)
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+  })
+  @ApiForbiddenResponse({ description: 'Forbidden.' })
   async createAdminUser(
     @Body(ValidationPipe) createUserDto: CreateUserDto,
   ): Promise<ReturnUserDto> {

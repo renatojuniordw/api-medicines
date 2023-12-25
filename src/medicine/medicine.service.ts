@@ -1,17 +1,17 @@
-import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import * as moment from 'moment';
 import * as XLSX from 'xlsx';
 
-import { Medicine } from './schemas/medicine.schema';
+import { Medicine } from './entity/medicine.entity';
 
-import { FilterDto } from './dto/filter.dto';
 import {
   ResultItemFilter,
   ResultMedicine,
   ResultNameMedicine,
 } from './dto/resultMedicine.dto';
+import { FilterDto } from './dto/filter.dto';
+import { MedicineDto } from './dto/medicine.dto';
 import { MedicineRepository } from './repository/medicines.repository';
 
 @Injectable()
@@ -26,14 +26,28 @@ export class MedicineService {
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
-  private readExcel(filePath: string): Medicine[] {
+  private createBatches(originalArray, batchSize) {
+    return originalArray.reduce((batches, item, index) => {
+      const batchIndex = Math.floor(index / batchSize);
+
+      if (!batches[batchIndex]) {
+        batches[batchIndex] = [];
+      }
+
+      batches[batchIndex].push(item);
+
+      return batches;
+    }, []);
+  }
+
+  private readExcel(filePath: string): any[] {
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
 
     const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { raw: false });
 
-    const listMedicines: Medicine[] = jsonData
+    const listMedicines: MedicineDto[] = jsonData
       .map((item: any) => ({
         reference: item['__EMPTY'],
         activeIngredient: item['__EMPTY_1'],
@@ -58,16 +72,17 @@ export class MedicineService {
         activeIngredient: this.capitalizeFirstWord(item.activeIngredient),
       }));
 
-    return listMedicines;
+    return this.createBatches(listMedicines, 1000);
   }
 
-  private async create(listMedicines: Medicine[]): Promise<Medicine[]> {
-    return await this.medicineRepository.save(listMedicines);
-  }
-
-  async importMedicines(filePath: string): Promise<Medicine[]> {
+  async importMedicines(filePath: string): Promise<MedicineDto[]> {
     const data = this.readExcel(filePath);
-    return await this.create(data);
+
+    const promises = data.map(async (items: any) => {
+      return await this.medicineRepository.save(items);
+    });
+
+    return await Promise.all(promises);
   }
 
   async findMedicine(

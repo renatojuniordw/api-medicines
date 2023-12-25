@@ -5,7 +5,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
 import { config } from './config/env.config';
 import { mailerConfig } from './config/mailer.config';
-
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 
@@ -19,25 +18,24 @@ import 'dotenv/config';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      port: 3306,
       type: 'mysql',
       host: process.env.DATABASE_HOST,
-      database: process.env.DATABASE_DB,
+      port: 3306,
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_DB,
       entities: [],
       synchronize: true,
       autoLoadEntities: true,
-      connectTimeout: 60000,
+      extra: {
+        connectTimeout: 60000,
+      },
     }),
-
     MailerModule.forRoot(mailerConfig),
     ConfigModule.forRoot({
       load: [config],
       isGlobal: true,
     }),
-    ConfigModule.forRoot(),
-
     AuthModule,
     EmailModule,
     UsersModule,
