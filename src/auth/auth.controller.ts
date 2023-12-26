@@ -52,11 +52,8 @@ export class AuthController {
   }
 
   @Patch(':token')
-  async confirmEmail(@Param('token') token: string) {
-    await this.authService.confirmEmail(token);
-    return {
-      message: 'Email confirmado',
-    };
+  async confirmEmail(@Param('token') confirmationToken: string) {
+    return await this.authService.confirmEmail(confirmationToken);
   }
 
   @Post('/send-recover-email')
@@ -77,7 +74,7 @@ export class AuthController {
     await this.authService.resetPassword(token, changePasswordDto);
 
     return {
-      message: 'Senha alterada com sucesso',
+      message: 'Senha alterada com sucesso.',
     };
   }
 
@@ -95,7 +92,19 @@ export class AuthController {
 
     await this.authService.changePassword(id, changePasswordDto);
     return {
-      message: 'Senha alterada',
+      message: 'Senha alterada.',
+    };
+  }
+
+  @Post('/resend-confirmation-email/:token')
+  @UseGuards(AuthGuard())
+  async resendConfirmationEmail(
+    @GetUser() user: User,
+    @Param('token') token: string,
+  ) {
+    await this.authService.resendConfirmationEmail(user.email, token);
+    return {
+      message: 'E-mail enviado com sucesso.',
     };
   }
 }

@@ -8,8 +8,6 @@ export class EmailService {
   constructor(private mailerService: MailerService) {}
 
   async sendUserConfirmation(user: User, token: string) {
-    const url = `example.com/auth/confirm?token=${token}`;
-
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Bem-vindo ao MedInter Web! Confirme seu email',
@@ -17,7 +15,6 @@ export class EmailService {
       context: {
         name: user.name,
         token: user.confirmationToken,
-        url,
       },
     });
   }

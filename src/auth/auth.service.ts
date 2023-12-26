@@ -35,14 +35,21 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const { name, email, id } = user;
+    const { name, email, id, confirmationToken, role } = user;
 
     const token = await this.jwtService.sign({
       id,
       email,
     });
 
-    return { name, email, token };
+    return {
+      role,
+      name,
+      email,
+      token,
+      confirmationToken,
+      isConfirmedEmail: !confirmationToken,
+    };
   }
 
   async signUp(createUserDto: CreateUserDto): Promise<User> {
@@ -66,19 +73,41 @@ export class AuthService {
     }
   }
 
-  async confirmEmail(confirmationToken: string): Promise<void> {
+  async confirmEmail(confirmationToken: string) {
+    const user = await this.userRepository.findOne({
+      where: { confirmationToken },
+    });
+
     const result = await this.userRepository.update(
       { confirmationToken },
       { confirmationToken: null },
     );
+
     if (result.affected === 0) throw new NotFoundException('Token inválido');
+
+    const { name, email, id, role } = user;
+
+    const token = await this.jwtService.sign({
+      id,
+      email,
+    });
+
+    return {
+      role,
+      name,
+      email,
+      token,
+      confirmationToken: null,
+      isConfirmedEmail: true,
+    };
   }
 
   async sendRecoverPasswordEmail(email: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { email } });
 
-    if (!user)
+    if (!user) {
       throw new NotFoundException('Não há usuário cadastrado com esse email.');
+    }
 
     user.recoverToken = randomBytes(32).toString('hex');
     await user.save();
@@ -113,5 +142,16 @@ export class AuthService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async resendConfirmationEmail(email: string, token: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException('Não há usuário cadastrado com esse email.');
+    }
+
+    await this.mailerService.sendUserConfirmation(user, token);
+    return null;
   }
 }
